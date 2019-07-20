@@ -4,10 +4,10 @@ indent() {
   sed -u 's/^/       /'
 }
 
-echo "-----> Install libjpeg62"
+echo "-----> Install libheif"
 BUILD_DIR=$1
 VENDOR_DIR="vendor"
-DOWNLOAD_URL="https://dl.dropboxusercontent.com/u/469156/heroku-buildpacks/libjpeg62.tar.gz"
+DOWNLOAD_URL="https://github.com/strukturag/libheif/releases/download/v1.4.0/libheif-1.4.0.tar.gz"
 
 echo "DOWNLOAD_URL = " $DOWNLOAD_URL | indent
 
@@ -17,7 +17,8 @@ cd $VENDOR_DIR
 curl -L --silent $DOWNLOAD_URL | tar xz
 
 echo "exporting PATH and LIBRARY_PATH" | indent
-PROFILE_PATH="$BUILD_DIR/.profile.d/libjpeg62.sh"
+PROFILE_PATH="$BUILD_DIR/.profile.d/libheif.sh"
 mkdir -p $(dirname $PROFILE_PATH)
-echo 'export PATH="$PATH:$HOME/vendor/libjpeg62/bin"' >> $PROFILE_PATH
-echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/vendor/libjpeg62/lib"' >> $PROFILE_PATH
+echo 'export CFLAGS="$PATH:$HOME/vendor/libheif/1.4.0/include"' >> $PROFILE_PATH
+echo 'export LDFLAGS="$PATH:$HOME/vendor/libheif/1.4.0/lib"' >> $PROFILE_PATH
+echo 'export PKG_CONFIG_PATH="$PATH:$HOME/vendor/libheif/1.4.0/lib/pkgconfig"' >> $PROFILE_PATH
