@@ -1,24 +1,59 @@
-#!/bin/sh
+#!/bin/bash
 
 indent() {
   sed -u 's/^/       /'
 }
 
 echo "-----> Install libheif"
+
 BUILD_DIR=$1
-VENDOR_DIR="vendor"
-DOWNLOAD_URL="https://github.com/strukturag/libheif/releases/download/v1.4.0/libheif-1.4.0.tar.gz"
+CACHE_DIR=$2
+VENDOR_DIR="$BUILD_DIR/vendor"
+INSTALL_DIR="$VENDOR_DIR/libheif"
+LIBHEIF_VERSION="${LIBHEIF_VERSION:-1.4.0}"
+CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
-echo "DOWNLOAD_URL = " $DOWNLOAD_URL | indent
+if [ ! -f $CACHE_FILE ]; then
+  # install libheif
+  LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.xz"
+  LIBHEIF_DIR="libheif-$LIBHEIF_VERSION"
+  LIBHEIF_URL="https://github.com/strukturag/libheif/releases/download/v$LIBHEIF_VERSION/$LIBHEIF_FILE"
 
-cd $BUILD_DIR
-mkdir -p $VENDOR_DIR
-cd $VENDOR_DIR
-curl -L --silent $DOWNLOAD_URL | tar xz
+  echo "-----> Downloading libheif from $LIBHEIF_URL"
+  wget $LIBHEIF_URL -P $BUILD_DIR | indent
 
-echo "exporting PATH and LIBRARY_PATH" | indent
-PROFILE_PATH="$BUILD_DIR/.profile.d/libheif.sh"
-mkdir -p $(dirname $PROFILE_PATH)
-echo 'export CFLAGS="$PATH:$HOME/vendor/libheif/1.4.0/include"' >> $PROFILE_PATH
-echo 'export LDFLAGS="$PATH:$HOME/vendor/libheif/1.4.0/lib"' >> $PROFILE_PATH
-echo 'export PKG_CONFIG_PATH="$PATH:$HOME/vendor/libheif/1.4.0/lib/pkgconfig"' >> $PROFILE_PATH
+  echo "-----> Extracting libheif from $BUILD_DIR/$LIBHEIF_FILE"
+  if [ ! -f $BUILD_DIR/$LIBHEIF_FILE ]; then
+    echo "Error: Unable to download libheif" | indent
+    ls $BUILD_DIR | indent
+    exit 1;
+  fi
+  tar xvf $BUILD_DIR/$LIBHEIF_FILE | indent
+
+  echo "-----> Building libheif"
+  cd $LIBHEIF_DIR
+  export CPPFLAGS="-I$INSTALL_DIR/include"
+  export LDFLAGS="-L$INSTALL_DIR/lib"
+  ./configure
+  make && make install
+  cd ..
+  rm -rf $LIBHEIF_DIR
+
+  # cache for future deploys
+  echo "-----> Caching libheif installation"
+  cd $VENDOR_DIR
+  REL_INSTALL_DIR="libheif"
+  tar czf $REL_INSTALL_DIR.tar.gz $REL_INSTALL_DIR
+
+  if [ ! -d $CACHE_DIR ]; then
+    mkdir -p $CACHE_DIR
+  fi
+
+  mv $REL_INSTALL_DIR.tar.gz $CACHE_FILE
+
+else
+  # cache exists, extract it
+  echo "-----> Extracting libheif $CACHE_FILE => $VENDOR_DIR"
+  mkdir -p $VENDOR_DIR
+  tar xzf $CACHE_FILE -C $VENDOR_DIR
+fi
