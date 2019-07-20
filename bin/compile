@@ -28,7 +28,7 @@ if [ ! -f $CACHE_FILE ]; then
     ls $BUILD_DIR | indent
     exit 1;
   fi
-  tar xz $BUILD_DIR/$LIBHEIF_FILE | indent
+  tar zxf $BUILD_DIR/$LIBHEIF_FILE | indent
 
   echo "-----> Building libheif"
   cd $LIBHEIF_DIR
