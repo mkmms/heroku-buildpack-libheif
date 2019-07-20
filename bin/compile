@@ -32,8 +32,6 @@ if [ ! -f $CACHE_FILE ]; then
 
   echo "-----> Building libheif"
   cd $LIBHEIF_DIR
-  export CPPFLAGS="-I$INSTALL_DIR/include"
-  export LDFLAGS="-L$INSTALL_DIR/lib"
   ./configure
   make && make install
   cd ..
