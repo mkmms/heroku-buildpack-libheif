@@ -15,7 +15,7 @@ CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
 if [ ! -f $CACHE_FILE ]; then
   # install libheif
-  LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.xz"
+  LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
   LIBHEIF_DIR="libheif-$LIBHEIF_VERSION"
   LIBHEIF_URL="https://github.com/strukturag/libheif/releases/download/v$LIBHEIF_VERSION/$LIBHEIF_FILE"
 
@@ -28,7 +28,7 @@ if [ ! -f $CACHE_FILE ]; then
     ls $BUILD_DIR | indent
     exit 1;
   fi
-  tar xvf $BUILD_DIR/$LIBHEIF_FILE | indent
+  tar xz $BUILD_DIR/$LIBHEIF_FILE | indent
 
   echo "-----> Building libheif"
   cd $LIBHEIF_DIR
